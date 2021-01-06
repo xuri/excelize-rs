@@ -100,10 +100,11 @@ mod tests {
         let path = String::from("src/test/Book1.xlsx");
         let wb = Spreadsheet::open_file(path);
         match wb {
-            Ok(ws) => match ws.get_cell_value("Sheet1", 2, 1) {
+            Ok(ws) => match ws.get_cell_value("Sheet1", 22, 1) {
                 Ok(c) => {
                     let cell = String::from(c);
-                    println!("the value of cell A1 is: {}", cell)
+                    println!("the value of cell A2 is: {}", cell);
+                    assert_eq!(cell, "GitHub");
                 }
                 Err(e) => {
                     println!("{:?}", e);
