@@ -1,0 +1,21 @@
+[package]
+name = "excelize-rs"
+version = "0.1.0"
+authors = ["xuri <xuri.me@gmail.com>"]
+edition = "2018"
+license = "BSD 3-Clause"
+homepage="https://github.com/xuri/exelize-rs"
+repository="https://github.com/xuri/exelize-rs"
+documentation="https://docs.rs/excelize-rs/"
+description="Rust library for reading and writing Excel spreadsheet files."
+readme = "README.md"
+keywords = ["Excel", "spreadsheet", "xlsx", "xlsm", "xlsb", "xlam", "xls", "xla", "office", "ooxml", "vba"]
+categories = ["encoding", "text-processing", "parsing"]
+
+[badges]
+travis-ci = { repository = "xuri/excelize-rs" }
+
+[dependencies]
+zip = "0.5.9"
+serde = { version = "1.0.118", features = [ "derive" ] }
+quick-xml = { version = "0.20", features = [ "serialize" ] }
