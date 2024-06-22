@@ -108,12 +108,12 @@ mod tests {
                 }
                 Err(e) => {
                     println!("{:?}", e);
-                    panic!(e);
+                    std::panic::panic_any(e);
                 }
             },
             Err(e) => {
                 print!("{:?}", e);
-                panic!(e);
+                std::panic::panic_any(e);
             }
         }
     }
