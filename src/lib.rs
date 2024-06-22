@@ -12,9 +12,9 @@
 //! The following constitutes the bare to read a spreadsheet document.
 //!
 //! ```rust
-//! extern crate excelize_rs;
+//! extern crate excelize;
 //!
-//! use excelize_rs::*;
+//! use excelize::*;
 //!
 //! fn main() {
 //!     let path = String::from("Book1.xlsx");
@@ -33,7 +33,7 @@
 //! ```
 pub mod cell;
 pub mod errors;
-pub mod excelize;
+pub mod app;
 pub mod rels;
 pub mod sst;
 pub mod utils;
@@ -47,7 +47,7 @@ pub mod xml_worksheet;
 
 pub use cell::*;
 pub use errors::*;
-pub use excelize::*;
+pub use app::*;
 pub use rels::*;
 pub use sst::*;
 pub use utils::*;
