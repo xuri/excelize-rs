@@ -184,6 +184,8 @@ pub struct CTCell {
     pub r: String,
     #[serde(rename = "t")]
     pub t: Option<String>,
+    #[serde(rename = "s")]
+    pub s: Option<u32>,
     #[serde(rename = "v")]
     pub v: Option<String>,
 }
@@ -211,11 +213,11 @@ pub struct CTSheetPr {
     pub filter_mode: Option<bool>,
     #[serde(rename = "enableFormatConditionsCalculation")]
     pub enable_format_conditions_calculation: Option<bool>,
-    #[serde(rename = "tabColor")]
+    #[serde(rename = "tabColor", default)]
     pub tab_color: Vec<CTColor>,
-    #[serde(rename = "outlinePr")]
+    #[serde(rename = "outlinePr", default)]
     pub outline_pr: Vec<CTOutlinePr>,
-    #[serde(rename = "pageSetUpPr")]
+    #[serde(rename = "pageSetUpPr", default)]
     pub page_set_up_pr: Vec<CTPageSetUpPr>,
 }
 
@@ -315,7 +317,7 @@ pub struct CTSheetProtection {
 pub struct CTAutoFilter {
     #[serde(rename = "ref")]
     pub ref_attr: Option<String>,
-    #[serde(rename = "filterColumn")]
+    #[serde(rename = "filterColumn", default)]
     pub filter_column: Vec<CTFilterColumn>,
     #[serde(rename = "sortState")]
     pub sort_state: Option<CTSortState>,

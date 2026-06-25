@@ -3,11 +3,12 @@
 // the LICENSE file.
 
 use crate::{
-    xml_content_types, xml_rels, xml_sst, xml_workbook, xml_worksheet, ExcelizeError, Rels,
-    Workbook, Worksheet, SST,
+    xml_content_types, xml_rels, xml_sst, xml_styles, xml_workbook, xml_worksheet,
+    ExcelizeError, Rels, Workbook, Worksheet, SST, Styles
 };
 use std::{collections::HashMap, fs, io};
 use zip::ZipArchive;
+
 #[derive(Debug)]
 pub struct Spreadsheet {
     pub file: HashMap<String, Vec<u8>>,
@@ -16,6 +17,7 @@ pub struct Spreadsheet {
     pub worksheets: HashMap<String, xml_worksheet::XMLWorksheet>,
     pub sst: Option<xml_sst::CTSST>,
     pub rels: HashMap<String, xml_rels::XMLRelationships>,
+    pub styles: Option<xml_styles::CTStylesheet>,   // <-- add this field
 }
 
 impl Spreadsheet {
@@ -27,7 +29,9 @@ impl Spreadsheet {
             worksheets: HashMap::new(),
             sst: None,
             rels: HashMap::new(),
+            styles: None
         };
+
         match fs::File::open(&path) {
             Ok(file) => {
                 let mut archive: zip::ZipArchive<std::fs::File>;
@@ -84,6 +88,7 @@ impl Spreadsheet {
                     Err(e) => return Err(e),
                 }
                 if spreadsheet.get_sst().is_ok() {}
+                if spreadsheet.get_styles().is_ok() {}
                 Ok(spreadsheet)
             }
             Err(e) => Err(ExcelizeError::CommonError(e.to_string())),

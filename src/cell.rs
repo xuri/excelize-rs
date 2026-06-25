@@ -3,50 +3,79 @@
 // the LICENSE file.
 
 use crate::{column_number_to_name, CTCell, ExcelizeError, Spreadsheet};
+
 pub trait Cell {
     /// GetCellValue provides a function to get formatted value from cell by given
     /// worksheet name and axis in spreadsheet.
     fn get_cell_value(&self, sheet: &str, row: u32, col: u32) -> Result<String, ExcelizeError>;
     fn get_value_from(&self, cell: &CTCell) -> String;
+    /// GetCellStyle provides a function to get the resolved style (numFmt/font/fill/border
+    /// ids) of a cell by given worksheet name and axis in spreadsheet.
+    fn get_cell_style(&self, sheet: &str, row: u32, col: u32) -> Result<CellStyle, ExcelizeError>;
+    fn find_cell(&self, sheet: &str, row: u32, col: u32) -> Result<Option<&CTCell>, ExcelizeError>;
+}
+
+#[derive(Debug, Default, PartialEq)]
+pub struct CellStyle {
+    pub num_fmt_id: Option<u32>,
+    pub font_id: Option<u32>,
+    pub fill_id: Option<u32>,
+    pub border_id: Option<u32>,
 }
 
 impl Cell for Spreadsheet {
-    fn get_cell_value(&self, sheet: &str, row: u32, col: u32) -> Result<String, ExcelizeError> {
-        let empty = String::from("");
-        let column_title;
-        match column_number_to_name(col) {
-            Ok(c) => column_title = c,
-            Err(e) => return Err(e),
-        }
-        let worksheet = self.worksheets.get_key_value(sheet);
-        match worksheet {
+    fn find_cell(&self, sheet: &str, row: u32, col: u32) -> Result<Option<&CTCell>, ExcelizeError> {
+        let column_title = column_number_to_name(col)?;
+        let target_ref = format!("{}{}", column_title, row);
+
+        match self.worksheets.get_key_value(sheet) {
             Some(ws) => match &ws.1.sheet_data.row {
                 Some(xml_row) => {
                     for r in xml_row {
-                        match r.r {
-                            Some(rn) => {
-                                if rn == row {
-                                    for c in &r.c {
-                                        if c.r == format!("{}{}", column_title, row.to_string()) {
-                                            return Ok(self.get_value_from(&c));
-                                        }
-                                    }
+                        if r.r == Some(row) {
+                            for c in &r.c {
+                                if c.r == target_ref {
+                                    return Ok(Some(c));
                                 }
                             }
-                            None => return Ok(empty),
                         }
                     }
+                    Ok(None)
                 }
-                None => return Ok(empty),
+                None => Ok(None),
             },
-            None => {
-                return Err(ExcelizeError::CommonError(format!(
-                    "sheet {} is not exist",
-                    sheet
-                )))
-            }
+            None => Err(ExcelizeError::CommonError(format!(
+                "sheet {} is not exist",
+                sheet
+            ))),
         }
-        Ok(empty)
+    }
+
+    fn get_cell_value(&self, sheet: &str, row: u32, col: u32) -> Result<String, ExcelizeError> {
+        match self.find_cell(sheet, row, col)? {
+            Some(c) => Ok(self.get_value_from(c)),
+            None => Ok(String::from("")),
+        }
+    }
+
+    fn get_cell_style(&self, sheet: &str, row: u32, col: u32) -> Result<CellStyle, ExcelizeError> {
+        let style_idx = match self.find_cell(sheet, row, col)? {
+            Some(c) => c.s.unwrap_or(0),
+            None => 0,
+        };
+
+        match &self.styles {
+            Some(styles) => match styles.cell_xfs.xf.get(style_idx as usize) {
+                Some(xf) => Ok(CellStyle {
+                    num_fmt_id: xf.num_fmt_id,
+                    font_id: xf.font_id,
+                    fill_id: xf.fill_id,
+                    border_id: xf.border_id,
+                }),
+                None => Ok(CellStyle::default()),
+            },
+            None => Err(ExcelizeError::CommonError(String::from("styles is none"))),
+        }
     }
 
     fn get_value_from(&self, cell: &CTCell) -> String {
